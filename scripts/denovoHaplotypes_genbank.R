@@ -1,26 +1,17 @@
-setwd("/dipro/mmm/gorm/v2/dat/Saur/velvet")
-comid = c(1075:1166,1274:1284)
-velvet_file = paste("/dipro/mmm/gorm/v2/dat/Saur/velvet/C0000",comid,"_n1_contigs.fa.gz",sep="")
-#velvet_file = paste("/dipro/mmm/gorm/v3/dat/Saur/velvet/",formatC(1000*round(comid/1000),width=8,flag="0"),"/C0000",comid,"_contigs.fa.gz",sep="")
-ref_file = "/dipro/mmm/gorm/v2/dat/Saur/refgen/R00000022.fa"
+#version of this code to run using set of 16 Staph reference genomes from Genbank, as found: /dipro/mmm/gorm/v2/ana/Saur/xcarriage/mapping/v2b/staph_reference_isolates
+setwd("$WORKDIR")
+ref_file = "$WORKDIR/R00000022.fa"
 
 # Note that ref_range is 0-based
-
-#ref_range = "531000-533000" # ksgA
-#ref_range = "346000-351000" # SAR0304
-#ref_range = "6000-12000" # gyrA
-#ref_range = "126000-130000" # sirABC
-#ref_range = "674000-683000" # antiporter ion resistance
-# Note that ref_range is 0-based
-#ref_range = "223635-226424" # SAR0196 (hsdR)
-#ref_range = "1349005-1350345" # glnA
 #ref_range = "2381938-2383602" # SAR2297
 #ref_range = "2176993-2178608" # groEL
 #ref_range = "371783-373129"#SAR0326, test frameshift handling
 ref_range = "1502887-1535127" #ebh/SAR1447
 strand = "-"
 
-cmd = paste("bash -c \"blastn -query <(zcat ",velvet_file,") -subject ",ref_file," -subject_loc ",ref_range," -outfmt '6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send qseq'\"",sep="");
+genbank_genomes = read.table("$WORKDIR/staph_ref_genomes.txt",h=F,skip=0,as.is=T,sep="\t")
+genome = paste("/dipro/mmm/gorm/v2/ana/Saur/xcarriage/mapping/v2b/staph_reference_isolates/", genbank_genomes[,1], sep="")
+cmd = paste("bash -c \"blastn -query <(cat ",genome,") -subject ",ref_file," -subject_loc ",ref_range," -outfmt '6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send qseq'\"",sep="");
 
 res = read.table(pipe(cmd[1]),h=FALSE,as.is=TRUE)
 for(i in 2:length(cmd)) {
